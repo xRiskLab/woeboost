@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "woeboost"
+version = "1.0.0"
+description = "WoeBoost: Weight of Evidence (WOE) Gradient Boosting"
+authors = ["xRiskLab <contact@xrisklab.ai>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/xRiskLab/woeboost"
+repository = "https://github.com/xRiskLab/woeboost"
+keywords = ["weight of evidence", "gradient boosting", "scoring", "classification"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+
+[tool.poetry.dependencies]
+matplotlib = "^3.9.2"
+python = "^3.9"
+numpy = "^1.19.5"
+pandas = "^2.2.2"
+scikit-learn = "^1.3.0"
+rich = "^13.7.1"
+cmap = "^0.4.0"
+pydocstyle = "^6.3.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+isort = "^5.13.2"
+pylint = "^3.2.6"
+pytest = "^8.3.2"
+pre-commit = "^4.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

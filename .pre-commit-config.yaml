@@ -1,0 +1,24 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+    - id: trailing-whitespace
+      files: \.py$
+    - id: end-of-file-fixer
+      files: \.py$
+- repo: local
+  hooks:
+    - id: pylint
+      name: pylint
+      entry: poetry run pylint
+      language: system
+      types: [python]
+      files: \.py$
+      args:
+        - "--disable=C0302"
+- repo: https://github.com/PyCQA/pydocstyle
+  rev: 6.3.0
+  hooks:
+    - id: pydocstyle
+      entry: poetry run pydocstyle
+      files: \.py$
