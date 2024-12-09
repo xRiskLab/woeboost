@@ -489,7 +489,7 @@ class EvidenceAnalyzer:
         aggregated = contributions_df.sort_values(by="contribution", ascending=True)
 
         # Plot contributions
-        _, ax = plt.subplots(figsize=(8, 6), dpi=200)
+        _, ax = plt.subplots()
         aggregated.plot(
             kind="barh", ax=ax, width=0.8, color="#02ff00",
             edgecolor="black", linewidth=1.0, legend=False

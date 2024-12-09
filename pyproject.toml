@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "woeboost"
-version = "1.0.0"
+version = "1.0.1"
 description = "WoeBoost: Weight of Evidence (WOE) Gradient Boosting"
 authors = ["xRiskLab <contact@xrisklab.ai>"]
 license = "MIT"

@@ -148,10 +148,10 @@ print(f"Deciban Scores: {deciban_scores[:5]}")
 ```
 
 ## Related Modules
-- [`classifier.py`](./classifier.md): Uses `WoeLearner` to build the boosted classification model.
+- [`classifier.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/classifier.md): Uses `WoeLearner` to build the boosted classification model.
 
 ## **References**
-For an overview of modules, check [the Technical Note](./technical_note.md).
+For an overview of modules, check **[the Technical Note](https://github.com/xRiskLab/woeboost/blob/main/docs/technical_note.md)**.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE.md) file for details.
+This project is licensed under the MIT License - see the **[LICENSE](https://github.com/xRiskLab/woeboost/blob/main/LICENSE.md)** file for details.

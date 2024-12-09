@@ -2,7 +2,7 @@
 
 The `classifier.py` module implements the **WoeBoostClassifier**, the training orchestrator. Building upon the `WoeLearner` from `learner.py`, it trains a sequence of estimators, applies evidence-based learning, and supports high interpretability in decision-making contexts.
 
-> The `WoeBoostClassifier` combines the strengths of gradient boosting and Weight of Evidence (WOE) principles for interpretable and high-performing predictions.
+> The `WoeBoostClassifier` combines the strengths of gradient boosting and Weight of Evidence (WOE) principles for interpretable and high-performing scoring models.
 
 ---
 
@@ -127,7 +127,7 @@ A configuration class that simplifies the setup of `WoeBoostClassifier`. Use thi
 from classifier import WoeBoostConfig
 
 config = WoeBoostConfig(
-    estimator=None,  # or woe_learner instance
+    estimator=None,  # or WoeLearner() instance
     n_estimators=500,
     bin_strategy='quantile',
     random_state=42,
@@ -192,14 +192,13 @@ plt.title('Score distribution')
 plt.show()
 ```
 
-![Score Distribution Example](./ims/classifier_predict_score.png)
+![Score Distribution Example](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/classifier_predict_score.png)
 
 ## Related Modules
-- [`learner.py`](./learner.md): Implements the base learner, `WoeLearner`, used by WoeBoostClassifier.
+- **[`learner.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/learner.md)**: Implements the base learner, `WoeLearner`, used by WoeBoostClassifier.
 
 ## References
-For an overview of modules, check [the Technical Note](./technical_note.md).
+For an overview of modules, check **[the Technical Note](https://github.com/xRiskLab/woeboost/blob/main/docs/technical_note.md)**.
 
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE.md) file for details.
+This project is licensed under the MIT License - see the **[LICENSE](https://github.com/xRiskLab/woeboost/blob/main/LICENSE.md)** file for details.

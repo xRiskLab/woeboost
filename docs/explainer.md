@@ -1,6 +1,6 @@
 # 🔍 `explainer.py`
 
-The `explainer.py` module provides tools to interpret and visualize models built using the **WoeBoostClassifier** framework. It aids in understanding the behavior and contribution of features, supports visual diagnostics, and enhances the interpretability of decision-making models.
+The `explainer.py` module provides tools to interpret and visualize models built using **WoeBoostClassifier**. It aids in understanding the behavior and contribution of features, supports visual diagnostics, and enhances the interpretability of models.
 
 > The module includes functionality for **Partial Dependence Plots (PDP)**, **evidence contribution analysis**, and **Weight of Evidence (WOE) inference**, ensuring that users can effectively explain and visualize model outputs.
 
@@ -135,11 +135,11 @@ pdp_analyzer.plot_pdp("revolving_utilization_of_unsecured_lines")
 ```
 **Example for numerical features:**
 
-![PDP Example](./ims/explainer_pdp_example.png)
+![PDP Example](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/explainer_pdp_example.png)
 
 **Example for categorical features:**
 
-![PDP Example Categorical](./ims/explainer_pdp_example_categorical.png)
+![PDP Example Categorical](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/explainer_pdp_example_categorical.png)
 
 #### Example: 2-Way PDP Analysis
 
@@ -154,11 +154,11 @@ pdp_analyzer.plot_2way_pdp("revolving_utilization_of_unsecured_lines", "account_
 ```
 **Example for numerical features:**
 
-![2Way PDP Example](./ims/explainer_2way_pdp_example.png)
+![2Way PDP Example](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/explainer_2way_pdp_example.png)
 
 **Example for categorical features:**
 
-![2Way PDP Example Categorical](./ims/explainer_2way_pdp_example_categorical.png)
+![2Way PDP Example Categorical](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/explainer_2way_pdp_example_categorical.png)
 
 ### Example: Evidence Contributions
 
@@ -175,7 +175,7 @@ contributions = evidence_analyzer.calculate_contributions()
 evidence_analyzer.plot_contributions(contributions, mode="cumulative")
 ```
 
-![Evidence Contribution Example](./ims/explainer_evidence_contributions.png)
+![Evidence Contribution Example](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/explainer_evidence_contributions.png)
 
 ### Example: Decision Boundary Visualization
 
@@ -194,7 +194,7 @@ visualizer.plot_decision_boundary(
 )
 ```
 
-![Decision Boundary Example](./ims/explainer_decision_boundary.png)
+![Decision Boundary Example](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/explainer_decision_boundary.png)
 
 ### Example: WOE Inference
 
@@ -212,13 +212,12 @@ proba = woe_inference.predict_proba(X_test)
 ```
 
 ## Related Modules
-- [`learner.py`](./learner.md): Base learner used for training individual estimators.
-- [`classifier.py`](./classifier.md): Boosted classifier orchestrating the training of base learners.
+- **[`learner.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/learner.md)**: Base learner used for training individual estimators.
+- **[`classifier.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/classifier.md)**: Boosted classifier orchestrating the training of base learners.
 
 
 ## References
-For an overview of modules, check [the Technical Note](./technical_note.md).
+For an overview of modules, check **[the Technical Note](https://github.com/xRiskLab/woeboost/blob/main/docs/technical_note.md)**.
 
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE.md) file for details.
+This project is licensed under the MIT License - see the **[LICENSE](https://github.com/xRiskLab/woeboost/blob/main/LICENSE.md)** file for details.

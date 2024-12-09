@@ -1,11 +1,20 @@
 # WoeBoost
 **Author:** [xRiskLab](https://github.com/xRiskLab)<br>
-**Version:** v0.1.0<br>
+**Version:** v1.0.1<br>
 **License:** [MIT License](https://opensource.org/licenses/MIT) (2024)
 
-![Title](docs/ims/woeboost.png)
+![Title](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/woeboost.png)
 
-**WoeBoost** is a Python 🐍 package designed to bridge the gap between the predictive power of gradient boosting and the interpretability required in high-stakes domains such as finance, healthcare, and law. It introduces an interpretable, evidence-driven framework for scoring, inspired by the principles of **Weight of Evidence (WOE)** and the ideas of **Alan M. Turing**.
+<div align="center">
+  <img src="https://img.shields.io/pypi/v/woeboost" alt="PyPI Version"/> 
+  <img src="https://img.shields.io/github/license/xRiskLab/woeboost" alt="License"/> 
+  <img src="https://img.shields.io/github/contributors/xRiskLab/woeboost" alt="Contributors"/> 
+  <img src="https://img.shields.io/github/issues/xRiskLab/woeboost" alt="Issues"/> 
+  <img src="https://img.shields.io/github/forks/xRiskLab/woeboost" alt="Forks"/> 
+  <img src="https://img.shields.io/github/stars/xRiskLab/woeboost" alt="Stars"/>
+</div><br>
+
+**WoeBoost** is a Python 🐍 package designed to bridge the gap between the predictive power of gradient boosting and the interpretability required in high-stakes domains such as finance, healthcare, and law. It introduces an interpretable, evidence-driven framework for scoring tasks, inspired by the principles of **Weight of Evidence (WOE)** and the ideas of **Alan M. Turing**.
 
 ## 🔑 Key Features
 
@@ -79,15 +88,18 @@ X_woe_test = woe_model.transform(X_test)
 
 ## 📚 Documentation
 
-- **[Technical Note](./docs/technical_note.md)**: Overview of the WoeBoost modules.
-- **[`learner.py`](./docs/learner.md)**: Core module implementing a base learner.
-- **[`classifier.py`](./docs/classifier.md)**: Module for building a boosted classification model.
-- **[`explainer.py`](./docs/explainer.md)**: Module for explaining the model predictions.
+- **[`Technical Note`](https://github.com/xRiskLab/woeboost/blob/main/docs/technical_note.md)**: Overview of the WoeBoost modules.
+- **[`learner.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/learner.md)**: Core module implementing a base learner.
+- **[`classifier.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/classifier.md)**: Module for building a boosted classification model.
+- **[`explainer.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/explainer.md)**: Module for explaining the model predictions.
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the **[LICENSE](https://github.com/xRiskLab/woeboost/blob/main/LICENSE.md)** file for details.
 
 ## 📃 Change Log
 
-- **v0.1.0**
+- **v1.0.1**
+  - Adjusted feature importance default plot size and added minor updates of documentation.
+
+- **v1.0.0**
   - Initial release of WoeBoost.
