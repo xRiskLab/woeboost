@@ -18,16 +18,19 @@ from woeboost.explainer import EvidenceAnalyzer, PDPAnalyzer, WoeInferenceMaker
 # Prevent displaying plots during tests
 matplotlib.use("Agg")
 
+
 # Fixtures
 # pylint: disable=invalid-name, redefined-outer-name
 @pytest.fixture
 def sample_data():
     """Fixture for generating sample data."""
-    X = pd.DataFrame({
-        "feature_1": random.choices(["A", "B", "C"], k=100),
-        "feature_2": np.random.rand(100),
-        "feature_3": np.random.randint(0, 100, 100),
-    })
+    X = pd.DataFrame(
+        {
+            "feature_1": random.choices(["A", "B", "C"], k=100),
+            "feature_2": np.random.rand(100),
+            "feature_3": np.random.randint(0, 100, 100),
+        }
+    )
     y = np.random.randint(0, 2, 100)
     return X, y
 
@@ -36,14 +39,11 @@ def sample_data():
 def trained_model(sample_data):
     """Fixture for training a simple WoeBoostClassifier."""
     X, y = sample_data
-    model = WoeBoostClassifier(
-        estimator=None,
-        n_estimators=10,
-        verbosity=30
-    )
+    model = WoeBoostClassifier(estimator=None, n_estimators=10, verbosity=30)
     model.fit(X, y)
     assert model.estimators, "The model was not trained correctly."
     return model
+
 
 # pylint: disable=broad-exception-caught
 def test_pdp_plot(sample_data, trained_model):
@@ -102,6 +102,7 @@ def test_evidence_contribution_calculation(sample_data, trained_model):
 
     assert len(contributions) == len(trained_model.estimators)
 
+
 def test_evidence_contribution_plot(sample_data, trained_model):
     """Test plotting of evidence contributions."""
     X, _ = sample_data
@@ -112,6 +113,7 @@ def test_evidence_contribution_plot(sample_data, trained_model):
         analyzer.plot_contributions(contributions, mode="cumulative")
     except Exception as e:
         pytest.fail(f"Evidence contribution plot failed with exception: {e}")
+
 
 def test_plot_decision_boundary(sample_data, trained_model):
     """Test the decision boundary plotting functionality."""
@@ -134,6 +136,7 @@ def test_plot_decision_boundary(sample_data, trained_model):
         )
     except Exception as e:
         pytest.fail(f"plot_decision_boundary failed with exception: {e}")
+
 
 # Tests for WoeInferenceMaker
 def test_bin_report(sample_data, trained_model):
@@ -170,6 +173,7 @@ def test_transform_to_woe_scores(sample_data, trained_model):
 
     assert transformed.shape == X.shape
     assert all(col in transformed.columns for col in X.columns)
+
 
 def test_predict_proba(sample_data, trained_model):
     """Test prediction of probabilities."""

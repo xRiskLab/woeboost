@@ -9,13 +9,15 @@ explainer.py.
 ░░╚██╔╝░╚██╔╝░╚█████╔╝███████╗██████╦╝╚█████╔╝╚█████╔╝██████╔╝░░░██║░░░
 ░░░╚═╝░░░╚═╝░░░╚════╝░╚══════╝╚═════╝░░╚════╝░░╚════╝░╚═════╝░░░░╚═╝░░░
 
-Copyright (c) 2024 xRiskLab / deburky
+Copyright (c) 2025 xRiskLab / deburky
 
 Licensed under the MIT License.
 
 You may obtain a copy of the License at:
     https://opensource.org/licenses/MIT
 """
+
+from __future__ import annotations
 
 import logging
 from functools import wraps
@@ -27,9 +29,10 @@ import pandas as pd
 from cmap import Colormap
 from rich.logging import RichHandler
 from scipy.special import expit as sigmoid
-from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
+# pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements
 def configure_logger(name: str, verbosity: int = logging.WARNING) -> logging.Logger:
     """
     Configure and return a logger with RichHandler.
@@ -66,16 +69,12 @@ def experimental_feature(func: callable) -> callable:
 
     Print a warning only once per function during the session.
     """
-    warned_functions = (
-        set()
-    )  # Keep track of functions that have already displayed the warning
+    warned_functions = set()  # Keep track of functions that have already displayed the warning
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         if func.__name__ not in warned_functions:
-            print(
-                f"WARNING: '{func.__name__}' is an experimental feature and may be unstable."
-            )
+            print(f"WARNING: '{func.__name__}' is an experimental feature and may be unstable.")
             warned_functions.add(func.__name__)
         return func(*args, **kwargs)
 
@@ -96,9 +95,7 @@ class PDPAnalyzer:
         Logging verbosity level.
     """
 
-    def __init__(
-        self, model: object, df: pd.DataFrame, verbosity: int = logging.WARNING
-    ) -> None:
+    def __init__(self, model: object, df: pd.DataFrame, verbosity: int = logging.WARNING) -> None:
         """
         Initialize the PDPAnalyzer.
 
@@ -193,17 +190,24 @@ class PDPAnalyzer:
         if is_categorical:
             # Bar chart for categorical features
             ax.bar(
-                feature_range, pdp_values, color="#00d9ff",
-                edgecolor="black", alpha=0.7, label="PDP"
+                feature_range,
+                pdp_values,
+                color="#00d9ff",
+                edgecolor="black",
+                alpha=0.7,
+                label="PDP",
             )
             ax.errorbar(
-                feature_range, pdp_values,
+                feature_range,
+                pdp_values,
                 yerr=[
                     [p - b for p, b in zip(pdp_values, pdp_values_lower)],
                     [a - p for a, p in zip(pdp_values_upper, pdp_values)],
                 ],
-                fmt="none", ecolor="black",
-                capsize=5, label="95% CI",
+                fmt="none",
+                ecolor="black",
+                capsize=5,
+                label="95% CI",
             )
             ax.set_xticks(range(len(feature_range)))
             ax.set_xticklabels(feature_range, rotation=45, ha="right")
@@ -211,8 +215,12 @@ class PDPAnalyzer:
             # Line plot for numerical features
             ax.plot(feature_range, pdp_values, label="PDP", color="#00d9ff", linewidth=1.5)
             ax.fill_between(
-                feature_range, pdp_values_upper, pdp_values_lower,
-                color="#d4f5ff", alpha=0.5, label="95% Confidence Interval"
+                feature_range,
+                pdp_values_upper,
+                pdp_values_lower,
+                color="#d4f5ff",
+                alpha=0.5,
+                label="95% Confidence Interval",
             )
 
         ax.set_xlabel(feature)
@@ -285,8 +293,12 @@ class PDPAnalyzer:
 
     # pylint: disable=too-many-positional-arguments
     def plot_2way_pdp(
-        self, feature1, feature2, num_points=50,
-        plot_type="contourf", cmap="colorcet:cet_d10",
+        self,
+        feature1,
+        feature2,
+        num_points=50,
+        plot_type="contourf",
+        cmap="colorcet:cet_d10",
         title=None,
         ax=None,  # pylint: disable=too-many-arguments
     ):  # pylint: disable=invalid-name, too-many-arguments
@@ -332,14 +344,20 @@ class PDPAnalyzer:
             plt.colorbar(contour, ax=ax, label="Partial Dependence")
         elif plot_type == "hist2d":
             hist = ax.hist2d(
-                grid_x.flatten(), grid_y.flatten(), bins=num_points,
-                weights=pdp_values.flatten(), cmap=cm
+                grid_x.flatten(),
+                grid_y.flatten(),
+                bins=num_points,
+                weights=pdp_values.flatten(),
+                cmap=cm,
             )
             plt.colorbar(hist[3], ax=ax, label="Partial Dependence")
         elif plot_type == "hexbin":
             hexbin = ax.hexbin(
-                grid_x.flatten(), grid_y.flatten(), C=pdp_values.flatten(),
-                gridsize=num_points, cmap=cm
+                grid_x.flatten(),
+                grid_y.flatten(),
+                C=pdp_values.flatten(),
+                gridsize=num_points,
+                cmap=cm,
             )
             plt.colorbar(hexbin, ax=ax, label="Partial Dependence")
         else:
@@ -377,9 +395,7 @@ class EvidenceAnalyzer:
         The dataframe containing the features to analyze.
     """
 
-    def __init__(
-        self, model: object, df: pd.DataFrame, verbosity: int = logging.WARNING
-    ) -> None:
+    def __init__(self, model: object, df: pd.DataFrame, verbosity: int = logging.WARNING) -> None:
         """
         Initialize the EvidenceAnalyzer.
 
@@ -414,9 +430,7 @@ class EvidenceAnalyzer:
             "Calculating [bold pale_green3]contributions[/bold pale_green3] in %s mode.",
             mode,
         )
-        cumulative_logits = pd.DataFrame(
-            0, index=self.df.index, columns=self.df.columns
-        )
+        cumulative_logits = pd.DataFrame(0, index=self.df.index, columns=self.df.columns)
         contributions_per_pass = []
 
         for _, estimator in enumerate(self.model.estimators):
@@ -434,9 +448,7 @@ class EvidenceAnalyzer:
                 )
             elif mode == "iteration":
                 # Calculate iteration-based contributions
-                contributions = (
-                    np.abs(iteration_df).sum() / np.abs(iteration_df).sum().sum()
-                )
+                contributions = np.abs(iteration_df).sum() / np.abs(iteration_df).sum().sum()
             else:
                 self.logger.error("Invalid mode provided: %s", mode)
                 raise ValueError("Mode must be either 'cumulative' or 'iteration'")
@@ -445,8 +457,7 @@ class EvidenceAnalyzer:
             contributions_per_pass.append(contributions)
 
         self.logger.info(
-            "[bold pale_green3]Contributions[/bold pale_green3] calculation "
-            "completed in %s mode.",
+            "[bold pale_green3]Contributions[/bold pale_green3] calculation completed in %s mode.",
             mode,
         )
         return contributions_per_pass
@@ -475,14 +486,10 @@ class EvidenceAnalyzer:
         )
         if mode == "cumulative":
             # Plot the last iteration if no specific iteration is provided
-            iteration = (
-                iteration if iteration is not None else len(contributions_per_pass) - 1
-            )
+            iteration = iteration if iteration is not None else len(contributions_per_pass) - 1
 
         elif mode == "iteration" and iteration is None:
-            raise ValueError(
-                "For iteration-based mode, a specific iteration must be provided."
-            )
+            raise ValueError("For iteration-based mode, a specific iteration must be provided.")
 
         contributions = contributions_per_pass[iteration]
         contributions_df = pd.DataFrame(contributions, columns=["contribution"])
@@ -491,8 +498,13 @@ class EvidenceAnalyzer:
         # Plot contributions
         _, ax = plt.subplots()
         aggregated.plot(
-            kind="barh", ax=ax, width=0.8, color="#02ff00",
-            edgecolor="black", linewidth=1.0, legend=False
+            kind="barh",
+            ax=ax,
+            width=0.8,
+            color="#02ff00",
+            edgecolor="black",
+            linewidth=1.0,
+            legend=False,
         )
         ax.set_title(
             (
@@ -512,9 +524,7 @@ class EvidenceAnalyzer:
         if ax is None:
             plt.show()
 
-        self.logger.info(
-            "[bold pale_green3]Contributions[/bold pale_green3] plot completed."
-        )
+        self.logger.info("[bold pale_green3]Contributions[/bold pale_green3] plot completed.")
 
     # pylint: disable=too-many-positional-arguments, too-many-branches
     @experimental_feature
@@ -528,9 +538,7 @@ class EvidenceAnalyzer:
         grid_size: tuple[int, int] = (5, 5),
         cmap: str = "colorcet:cet_d10",
         output_file: Optional[str] = None,
-    ) -> (
-        None
-    ):  # pylint: disable=too-many-arguments, invalid-name, too-many-locals, too-many-statements
+    ) -> None:  # pylint: disable=too-many-arguments, invalid-name, too-many-locals, too-many-statements
         """
         Plot the decision boundary for WoeBoost iterations (experimental feature).
 
@@ -555,7 +563,8 @@ class EvidenceAnalyzer:
         self.logger.info(
             "Generating [bold pale_green3]decision boundary[/bold pale_green3] plot "
             "for features: %s, %s",
-            feature1, feature2
+            feature1,
+            feature2,
         )
         # Convert NumPy arrays to DataFrames if necessary
         if isinstance(X, np.ndarray):
@@ -574,8 +583,8 @@ class EvidenceAnalyzer:
         start, end = iteration_range or (0, 25)
         rows, cols = grid_size
 
-        is_categorical_1 = feature1 in self.model.metadata['categorical_features']
-        is_categorical_2 = feature2 in self.model.metadata['categorical_features']
+        is_categorical_1 = feature1 in self.model.metadata["categorical_features"]
+        is_categorical_2 = feature2 in self.model.metadata["categorical_features"]
 
         if is_categorical_1:
             # Handle categorical feature 1
@@ -714,14 +723,14 @@ class EvidenceAnalyzer:
         if output_file:
             plt.savefig(output_file, dpi=300, bbox_inches="tight")
             print(f"Plot saved to {output_file}")
-        else:
-            if ax is None:
-                plt.show()
+        elif ax is None:
+            plt.show()
 
         self.logger.info(
             "Finished generating [bold pale_green3]decision boundary[/bold pale_green3] plot "
             "for features: %s, %s",
-            feature1, feature2
+            feature1,
+            feature2,
         )
 
 
@@ -739,7 +748,7 @@ class WoeInferenceMaker(BaseEstimator, TransformerMixin):
         """Initialize the WoeInferenceMaker."""
         self.model = model
         self.verbosity = verbosity
-        self.bin_reports = {}  # Store bin reports for each feature
+        self.bin_reports: dict[str, pd.DataFrame] = {}
         self.logger = configure_logger("WoeInferenceMaker", verbosity)
 
     def get_params(self, deep: bool = True) -> dict:
@@ -758,7 +767,7 @@ class WoeInferenceMaker(BaseEstimator, TransformerMixin):
         """
         return {"model": self.model, "verbosity": self.verbosity}
 
-    def set_params(self, **params) -> "WoeInferenceMaker":
+    def set_params(self, **params) -> WoeInferenceMaker:
         """
         Set parameters for this estimator.
 
@@ -865,8 +874,7 @@ class WoeInferenceMaker(BaseEstimator, TransformerMixin):
                 num_non_events.append(non_events_in_bin)
 
                 woe_cond_prob = np.log(
-                    (events_in_bin / total_events)
-                    / (non_events_in_bin / total_non_events)
+                    (events_in_bin / total_events) / (non_events_in_bin / total_non_events)
                     if events_in_bin > 0 and non_events_in_bin > 0
                     else ((events_in_bin + 0.5) / total_events)
                     / ((non_events_in_bin + 0.5) / total_non_events)
@@ -893,8 +901,7 @@ class WoeInferenceMaker(BaseEstimator, TransformerMixin):
                 num_non_events.append(non_events_in_bin)
 
                 woe_cond_prob = np.log(
-                    (events_in_bin / total_events)
-                    / (non_events_in_bin / total_non_events)
+                    (events_in_bin / total_events) / (non_events_in_bin / total_non_events)
                     if events_in_bin > 0 and non_events_in_bin > 0
                     else ((events_in_bin + 0.5) / total_events)
                     / ((non_events_in_bin + 0.5) / total_non_events)

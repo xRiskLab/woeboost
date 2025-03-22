@@ -9,11 +9,13 @@ classifier.py.
 ░░╚██╔╝░╚██╔╝░╚█████╔╝███████╗██████╦╝╚█████╔╝╚█████╔╝██████╔╝░░░██║░░░
 ░░░╚═╝░░░╚═╝░░░╚════╝░╚══════╝╚═════╝░░╚════╝░░╚════╝░╚═════╝░░░░╚═╝░░░
 
-Copyright (c) 2024 xRiskLab / deburky
+Copyright (c) 2025 xRiskLab / deburky
 
 Licensed under the MIT License. You may obtain a copy of the License at:
     https://opensource.org/licenses/MIT
 """
+
+from __future__ import annotations
 
 import logging
 import random
@@ -98,9 +100,8 @@ class WoeBoostConfig:  # pylint: disable=too-many-instance-attributes
         if self.n_estimators <= 0:
             raise ValueError("n_estimators must be greater than 0.")
 
-
     @classmethod
-    def from_dict(cls, param_dict: dict) -> "WoeBoostConfig":
+    def from_dict(cls, param_dict: dict) -> WoeBoostConfig:
         """
         Create a WoeBoostConfig instance from a dictionary.
 
@@ -222,7 +223,7 @@ class WoeBoostClassifier(BaseEstimator, ClassifierMixin):  # pylint: disable=too
                 tol=tol,
                 infer_monotonicity=infer_monotonicity,
                 early_stopping_metric=early_stopping_metric,
-                verbosity=verbosity
+                verbosity=verbosity,
             )
 
         # Map configuration fields to attributes
@@ -241,7 +242,7 @@ class WoeBoostClassifier(BaseEstimator, ClassifierMixin):  # pylint: disable=too
         # Initialize other attributes
         self.estimators: List[BaseEstimator] = []
         self.base_score = None
-        self.loss_history = []
+        self.loss_history: list[float] = []
         self.monotonicity = None
         self.metadata = None
         self._configure_logger()  # Configure logger
@@ -290,7 +291,7 @@ class WoeBoostClassifier(BaseEstimator, ClassifierMixin):  # pylint: disable=too
             self.logger.error(
                 "[bold red]Invalid parameter:[/bold red] tol=%s\n"
                 "[bold cyan]Expected:[/bold cyan] tol can only be set when early_stopping=True.",
-                tol
+                tol,
             )
             # Raise an error if tol is provided but early_stopping is False
             raise ValueError("`tol` can only be set when `early_stopping=True`.")
@@ -348,15 +349,14 @@ class WoeBoostClassifier(BaseEstimator, ClassifierMixin):  # pylint: disable=too
         y : np.ndarray
             The response vector.
         """
+
         def calculate_correlation(feature_data, y):
             mask = ~np.isnan(feature_data) & ~np.isnan(y)
             feature_data, y_clean = feature_data[mask], y[mask]
             if len(feature_data) > 1:
                 correlation = np.corrcoef(feature_data, y_clean)[0, 1]
                 return (
-                    "increasing"
-                    if correlation > 0
-                    else "decreasing" if correlation < 0 else None
+                    "increasing" if correlation > 0 else "decreasing" if correlation < 0 else None
                 )
             return None
 
@@ -403,7 +403,9 @@ class WoeBoostClassifier(BaseEstimator, ClassifierMixin):  # pylint: disable=too
                 else (
                     random.randint(*self.n_bins_range)
                     if isinstance(self.n_bins_range, tuple)
-                    else self.n_bins_range if isinstance(self.n_bins_range, str) else None
+                    else self.n_bins_range
+                    if isinstance(self.n_bins_range, str)
+                    else None
                 )
             ),
             "subsample": (
@@ -428,7 +430,7 @@ class WoeBoostClassifier(BaseEstimator, ClassifierMixin):  # pylint: disable=too
         X: Union[pd.DataFrame, np.ndarray],
         y: np.ndarray,
         valid: Optional[tuple] = None,
-    ) -> "WoeBoostClassifier":
+    ) -> WoeBoostClassifier:
         """
         Fits the inputs into the WoeBoost Classifier.
 
@@ -451,7 +453,7 @@ class WoeBoostClassifier(BaseEstimator, ClassifierMixin):  # pylint: disable=too
                 categorical_features=categorical_features,
                 n_bins=self.n_bins_range,
                 bin_strategy=self.bin_strategy,
-                random_state=self.random_state
+                random_state=self.random_state,
             )
 
         # Validate metadata in the estimator
@@ -472,7 +474,7 @@ class WoeBoostClassifier(BaseEstimator, ClassifierMixin):  # pylint: disable=too
         if self.infer_monotonicity:
             max_len = max(len(feature) for feature in self.monotonicity.keys())
             formatted_constraints = "\n".join(
-                f"[#8787d7]{feature.ljust(max_len)}[/#8787d7] : " f"[#d787d7]{constraint}[/#d787d7]"
+                f"[#8787d7]{feature.ljust(max_len)}[/#8787d7] : [#d787d7]{constraint}[/#d787d7]"
                 for feature, constraint in self.monotonicity.items()
             )
             self.logger.info(

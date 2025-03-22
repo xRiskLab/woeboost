@@ -1,28 +1,79 @@
-cmap==0.4.0 ; python_version >= "3.9" and python_version < "4.0"
-contourpy==1.3.0 ; python_version >= "3.9" and python_version < "4.0"
-cycler==0.12.1 ; python_version >= "3.9" and python_version < "4.0"
-fonttools==4.55.2 ; python_version >= "3.9" and python_version < "4.0"
-importlib-resources==6.4.5 ; python_version >= "3.9" and python_version < "3.10"
-joblib==1.4.2 ; python_version >= "3.9" and python_version < "4.0"
-kiwisolver==1.4.7 ; python_version >= "3.9" and python_version < "4.0"
-markdown-it-py==3.0.0 ; python_version >= "3.9" and python_version < "4.0"
-matplotlib==3.9.3 ; python_version >= "3.9" and python_version < "4.0"
-mdurl==0.1.2 ; python_version >= "3.9" and python_version < "4.0"
-numpy==1.26.4 ; python_version >= "3.9" and python_version < "4.0"
-packaging==24.2 ; python_version >= "3.9" and python_version < "4.0"
-pandas==2.2.3 ; python_version >= "3.9" and python_version < "4.0"
-pillow==11.0.0 ; python_version >= "3.9" and python_version < "4.0"
-pydocstyle==6.3.0 ; python_version >= "3.9" and python_version < "4.0"
-pygments==2.18.0 ; python_version >= "3.9" and python_version < "4.0"
-pyparsing==3.2.0 ; python_version >= "3.9" and python_version < "4.0"
-python-dateutil==2.9.0.post0 ; python_version >= "3.9" and python_version < "4.0"
-pytz==2024.2 ; python_version >= "3.9" and python_version < "4.0"
-rich==13.9.4 ; python_version >= "3.9" and python_version < "4.0"
-scikit-learn==1.6.0 ; python_version >= "3.9" and python_version < "4.0"
-scipy==1.13.1 ; python_version >= "3.9" and python_version < "4.0"
-six==1.17.0 ; python_version >= "3.9" and python_version < "4.0"
-snowballstemmer==2.2.0 ; python_version >= "3.9" and python_version < "4.0"
-threadpoolctl==3.5.0 ; python_version >= "3.9" and python_version < "4.0"
-typing-extensions==4.12.2 ; python_version >= "3.9" and python_version < "3.11"
-tzdata==2024.2 ; python_version >= "3.9" and python_version < "4.0"
-zipp==3.21.0 ; python_version >= "3.9" and python_version < "3.10"
+appnope==0.1.4
+astroid==3.3.9
+asttokens==3.0.0
+black==24.10.0
+cfgv==3.4.0
+click==8.1.8
+cmap==0.6.0
+comm==0.2.2
+contourpy==1.3.0
+cycler==0.12.1
+debugpy==1.8.13
+decorator==5.2.1
+dill==0.3.9
+distlib==0.3.9
+exceptiongroup==1.2.2
+executing==2.2.0
+faker==37.0.2
+filelock==3.18.0
+fonttools==4.56.0
+identify==2.6.9
+importlib-metadata==8.6.1
+importlib-resources==6.5.2
+iniconfig==2.1.0
+ipykernel==6.29.5
+ipython==8.18.1
+isort==5.13.2
+jedi==0.19.2
+joblib==1.4.2
+jupyter-client==8.6.3
+jupyter-core==5.7.2
+kiwisolver==1.4.7
+markdown-it-py==3.0.0
+matplotlib==3.9.4
+matplotlib-inline==0.1.7
+mccabe==0.7.0
+mdurl==0.1.2
+mypy-extensions==1.0.0
+nest-asyncio==1.6.0
+nodeenv==1.9.1
+numpy==1.26.4
+packaging==24.2
+pandas==2.2.3
+parso==0.8.4
+pathspec==0.12.1
+pexpect==4.9.0
+pillow==11.1.0
+platformdirs==4.3.7
+pluggy==1.5.0
+pre-commit==4.2.0
+prompt-toolkit==3.0.50
+psutil==7.0.0
+ptyprocess==0.7.0
+pure-eval==0.2.3
+pydocstyle==6.3.0
+pygments==2.19.1
+pylint==3.3.6
+pyparsing==3.2.1
+pytest==8.3.5
+python-dateutil==2.9.0.post0
+pytz==2025.1
+pyyaml==6.0.2
+pyzmq==26.3.0
+rich==13.9.4
+ruff==0.11.2
+scikit-learn==1.6.1
+scipy==1.13.1
+six==1.17.0
+snowballstemmer==2.2.0
+stack-data==0.6.3
+threadpoolctl==3.6.0
+tomli==2.2.1
+tomlkit==0.13.2
+tornado==6.4.2
+traitlets==5.14.3
+typing-extensions==4.12.2
+tzdata==2025.1
+virtualenv==20.29.3
+wcwidth==0.2.13
+zipp==3.21.0

@@ -1,6 +1,6 @@
 # WoeBoost
 **Author:** [xRiskLab](https://github.com/xRiskLab)<br>
-**Version:** v1.0.1<br>
+**Version:** v1.0.2<br>
 **License:** [MIT License](https://opensource.org/licenses/MIT) (2024)
 
 ![Title](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/woeboost.png)
@@ -97,6 +97,11 @@ X_woe_test = woe_model.transform(X_test)
 This project is licensed under the MIT License - see the **[LICENSE](https://github.com/xRiskLab/woeboost/blob/main/LICENSE.md)** file for details.
 
 ## 📃 Change Log
+
+- **v1.0.2**
+  - Support for `n_tasks` with legacy `n_threads` fallback (deprecated in the future).
+  - Updated concurrency support via a callable for (e.g., `ThreadPoolExecutor`).
+  - Type hints improvements.
 
 - **v1.0.1**
   - Adjusted feature importance default plot size and added minor updates of documentation.

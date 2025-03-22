@@ -45,9 +45,11 @@ The `WoeLearner` class implements the core functionality of the Weight of Eviden
 | `categorical_features`  | `List[str]`       | `None`        | List of categorical features.                                              |
 | `monotonicity`          | `dict`            | `None`        | Dictionary of monotonicity constraints (`'increasing'` or `'decreasing'`). |
 | `infer_monotonicity`    | `bool`            | `False`       | Whether to automatically infer monotonicity.                               |
-| `n_threads`             | `int`             | `None`        | Number of threads for parallel operations.                                 |
+| `n_tasks`             | `int`             | `None`        | Number of tasks for concurrent operations.                                 |
+| `executor_cls`          | `str`             | `None`    | Executor class for concurrent operations (e.g., `'ThreadPoolExecutor'`).      |
 | `verbosity`             | `int`             | `logging.WARNING` | Logging level (`DEBUG`, `INFO`, etc.).                                    |
 
+Starting from v1.0.2, `n_tasks` and `executor_cls` were added to support concurrent operations. `n_threads` was removed in favor of these parameters.
 ---
 
 ### **Attributes**

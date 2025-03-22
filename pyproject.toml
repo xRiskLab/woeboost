@@ -1,12 +1,12 @@
-[tool.poetry]
+[project]
 name = "woeboost"
-version = "1.0.1"
+version = "1.0.2"
 description = "WoeBoost: Weight of Evidence (WOE) Gradient Boosting"
-authors = ["xRiskLab <contact@xrisklab.ai>"]
-license = "MIT"
+authors = [
+    { name = "xRiskLab", email = "contact@xrisklab.ai" }
+]
+license = { text = "MIT" }
 readme = "README.md"
-homepage = "https://github.com/xRiskLab/woeboost"
-repository = "https://github.com/xRiskLab/woeboost"
 keywords = ["weight of evidence", "gradient boosting", "scoring", "classification"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -19,24 +19,54 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Artificial Intelligence"
 ]
+requires-python = ">=3.9"
+dependencies = [
+    "matplotlib>=3.9.2,<4.0.0",
+    "numpy>=1.19.5,<2.0.0",
+    "pandas>=2.2.2,<3.0.0",
+    "scikit-learn>=1.3.0,<2.0.0",
+    "rich>=13.7.1,<14.0.0",
+    "cmap>=0.4.0,<1.0.0",
+    "pydocstyle>=6.3.0,<7.0.0",
+    "woeboost>=1.0.1",
+]
 
-[tool.poetry.dependencies]
-matplotlib = "^3.9.2"
-python = "^3.9"
-numpy = "^1.19.5"
-pandas = "^2.2.2"
-scikit-learn = "^1.3.0"
-rich = "^13.7.1"
-cmap = "^0.4.0"
-pydocstyle = "^6.3.0"
+[project.urls]
+Repository = "https://github.com/xRiskLab/woeboost"
+Homepage = "https://github.com/xRiskLab/woeboost"
 
-[tool.poetry.group.dev.dependencies]
-black = "^24.4.2"
-isort = "^5.13.2"
-pylint = "^3.2.6"
-pytest = "^8.3.2"
-pre-commit = "^4.0.1"
+[tool.setuptools]
+packages = ["woeboost"]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "black>=24.4.2,<25.0.0",
+    "isort>=5.13.2,<6.0.0",
+    "ipykernel>=6.29.5",
+    "pylint>=3.2.6,<4.0.0",
+    "pytest>=8.3.2,<9.0.0",
+    "pre-commit>=4.0.1,<5.0.0",
+    "faker>=37.0.2",
+    "ruff>=0.11.2",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+fix = true
+indent-width = 4
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["D100", "D103"]
+
+[tool.pytest.ini_options]
+pythonpath = ["woeboost"]
