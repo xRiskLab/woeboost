@@ -7,3 +7,6 @@ __pycache__/
 **/__pycache__/*.pyc
 *.pyc
 **/*.pyc
+.venv/
+.ruff_cache/
+woeboost.egg-info/

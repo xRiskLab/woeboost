@@ -11,6 +11,7 @@ from contextlib import nullcontext
 
 import numpy as np
 import pytest
+
 from woeboost.classifier import WoeBoostClassifier, WoeBoostConfig
 from woeboost.learner import WoeLearner
 
@@ -63,7 +64,7 @@ def test_initialization(config):
         "valid-histogram-list",
         "invalid-list-content",
         "invalid-negative-range",
-    ]
+    ],
 )
 
 # pylint: disable=unused-variable
@@ -75,6 +76,7 @@ def test_n_bins_range_validation(n_bins_range, expected_exception, sample_data):
         config = WoeBoostConfig(n_bins_range=n_bins_range, estimator=None)
         clf = WoeBoostClassifier(config=config)
         clf.fit(X, y)
+
 
 def test_training(sample_data):
     """Test basic training with valid data."""
@@ -148,8 +150,7 @@ def test_invalid_monotonicity(sample_data):
     clf = WoeBoostClassifier(
         config=WoeBoostConfig(
             estimator=WoeLearner(
-                feature_names=["f1", "f2", "f3"],
-                monotonicity={"f4": "increasing"}
+                feature_names=["f1", "f2", "f3"], monotonicity={"f4": "increasing"}
             ),
             n_estimators=10,
             verbosity=30,

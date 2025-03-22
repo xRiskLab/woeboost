@@ -16,12 +16,13 @@ __all__ = [
     "EvidenceAnalyzer",
     "PDPAnalyzer",
     "WoeInferenceMaker",
-    "WoeLearner"
+    "WoeLearner",
 ]
 
 # Add dynamic version retrieval
 try:
     from importlib.metadata import version
+
     __version__ = version("woeboost")
 except ImportError:
     __version__ = "unknown"
