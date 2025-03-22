@@ -70,3 +70,9 @@ convention = "google"
 
 [tool.pytest.ini_options]
 pythonpath = ["woeboost"]
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
