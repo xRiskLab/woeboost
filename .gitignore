@@ -8,4 +8,4 @@ __pycache__/
 *.pyc
 **/*.pyc
 .venv/
-.ruff_cache/
+.ruff_cache/woeboost.egg-info/
