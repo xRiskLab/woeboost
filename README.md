@@ -40,7 +40,7 @@
 
 - **💡 Interpretability**: Every model step adheres to principles familiar to risk managers and data scientists, ensuring transparency and trust.
 - **✅ Alignment with Regulatory Requirements**: Calibrated and interpretable results meet the demands of high-stakes applications.
-- **⚡ Flexibility**: Works seamlessly with diverse data types and supports customizations for complex datasets, including multi-threading for CPU.
+- **⚡ Flexibility**: Works seamlessly with diverse data types and supports concurrency for feature binning with Python's `concurrent.futures`.
 
 ## Installation ⤵
 
@@ -100,7 +100,7 @@ This project is licensed under the MIT License - see the **[LICENSE](https://git
 
 - **v1.0.2**
   - Support for `n_tasks` with legacy `n_threads` fallback (deprecated in the future).
-  - Updated concurrency support via a callable for (e.g., `ThreadPoolExecutor`).
+  - Updated concurrency support via a callable (e.g., `ThreadPoolExecutor`).
   - Type hints improvements.
 
 - **v1.0.1**
