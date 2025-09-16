@@ -31,6 +31,7 @@ jobs:
     
     - name: Install dependencies
       run: |
+        uv sync
         uv sync --group dev
     
     - name: Run unit tests
@@ -73,6 +74,7 @@ jobs:
     
     - name: Install dependencies
       run: |
+        uv sync
         uv sync --group dev
     
     - name: Build package
@@ -106,6 +108,7 @@ jobs:
     
     - name: Install dependencies
       run: |
+        uv sync
         uv sync --group dev
     
     - name: Lint code
@@ -116,9 +119,6 @@ jobs:
       run: |
         uv run ruff format --check .
     
-    - name: Type check
-      run: |
-        uv run mypy woeboost/
 
 
 

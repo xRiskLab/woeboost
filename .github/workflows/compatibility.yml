@@ -30,6 +30,7 @@ jobs:
     
     - name: Test standard version
       run: |
+        uv sync
         uv sync --group dev
         python -c "import woeboost; print('Standard version works')"
         python -c "from woeboost import WoeBoostClassifier; print('Free-threading detected:', WoeBoostClassifier().is_freethreaded)"
@@ -116,6 +117,7 @@ jobs:
     
     - name: Install dependencies
       run: |
+        uv sync
         uv sync --group dev
     
     - name: Run basic tests

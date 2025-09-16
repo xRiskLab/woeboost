@@ -7,7 +7,7 @@
 <div align="center">
   <img src="https://github.com/xRiskLab/woeboost/workflows/CI/badge.svg" alt="CI"/>
   <img src="https://github.com/xRiskLab/woeboost/actions/workflows/freethreaded.yml/badge.svg" alt="Free-threaded"/>
-  <img src="https://github.com/xRiskLab/woeboost/actions/workflows/compatbility.yml/badge.svg" alt="Compatibility"/>
+  <img src="https://github.com/xRiskLab/woeboost/actions/workflows/compatibility.yml/badge.svg" alt="Compatibility"/>
   <img src="https://img.shields.io/pypi/v/woeboost" alt="PyPI Version"/> 
   <img src="https://img.shields.io/github/license/xRiskLab/woeboost" alt="License"/> 
   <img src="https://img.shields.io/github/contributors/xRiskLab/woeboost" alt="Contributors"/> 
