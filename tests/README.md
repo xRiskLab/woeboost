@@ -18,8 +18,6 @@ tests/
 │   ├── test_woeboost_freethreaded.py
 │   ├── test_minimal_freethreaded.py
 │   ├── run_freethreaded_tests.py
-│   ├── requirements-freethreaded.txt
-│   ├── pyproject-freethreaded.toml
 │   └── README_FREETHREADED.md
 └── __init__.py
 ```
