@@ -28,7 +28,7 @@ jobs:
       run: |
         uv sync
         uv run python -c "import woeboost; print('Standard version works')"
-        uv run python -c "from woeboost import WoeBoostClassifier; print('Free-threading detected:', WoeBoostClassifier().is_freethreaded)"
+        uv run python -c "from woeboost import WoeLearner; print('Free-threading detected:', WoeLearner().is_freethreaded)"
 
 
 

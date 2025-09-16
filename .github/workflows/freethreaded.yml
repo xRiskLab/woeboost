@@ -20,9 +20,29 @@ jobs:
       with:
         version: "latest"
     
+    - name: Install free-threaded Python
+      run: |
+        uv python install 3.14.0a5+freethreaded
+    
+    - name: Test with free-threaded Python
+      run: |
+        # Use the free-threaded Python directly
+        uv run --python 3.14.0a5+freethreaded python -c "
+        import sys
+        print('Python version:', sys.version)
+        print('Free-threading enabled:', getattr(sys, '_is_freethreaded', False))
+        print('Version contains freethreaded:', 'freethreaded' in sys.version.lower())
+        
+        # Test WoeBoost import and detection
+        from woeboost import WoeLearner
+        learner = WoeLearner()
+        print('WoeBoost free-threading detected:', learner.is_freethreaded)
+        print('✅ Free-threaded Python test completed successfully')
+        "
+    
     - name: Test freethreaded extra availability
       run: |
-        # Test that freethreaded extra is available (but don't install it to avoid conflicts)
+        # Test that freethreaded extra is available
         python -c "
         import tomllib
         with open('pyproject.toml', 'rb') as f:
@@ -31,16 +51,6 @@ jobs:
             print('✅ Free-threaded extra is available')
         else:
             print('❌ Free-threaded extra not found')
-        "
-    
-    - name: Test free-threading detection
-      run: |
-        python -c "
-        import sys
-        print('Python version:', sys.version)
-        print('Free-threading check:', hasattr(sys, '_is_freethreaded'))
-        print('Version string check:', 'freethreaded' in sys.version.lower())
-        print('Expected: Free-threading check should be False for standard Python')
         "
 
 
