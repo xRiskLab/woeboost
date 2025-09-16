@@ -27,8 +27,8 @@ jobs:
     - name: Test standard version
       run: |
         uv sync
-        python -c "import woeboost; print('Standard version works')"
-        python -c "from woeboost import WoeBoostClassifier; print('Free-threading detected:', WoeBoostClassifier().is_freethreaded)"
+        uv run python -c "import woeboost; print('Standard version works')"
+        uv run python -c "from woeboost import WoeBoostClassifier; print('Free-threading detected:', WoeBoostClassifier().is_freethreaded)"
 
 
 
