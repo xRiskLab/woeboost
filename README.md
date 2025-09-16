@@ -1,11 +1,13 @@
 # WoeBoost
 **Author:** [xRiskLab](https://github.com/xRiskLab)<br>
-**Version:** v1.0.2<br>
-**License:** [MIT License](https://opensource.org/licenses/MIT) (2024)
+**License:** [MIT License](https://opensource.org/licenses/MIT) (2025)
 
 ![Title](https://raw.githubusercontent.com/xRiskLab/woeboost/main/docs/ims/woeboost.png)
 
 <div align="center">
+  <img src="https://github.com/xRiskLab/woeboost/workflows/CI/badge.svg" alt="CI"/>
+  <img src="https://github.com/xRiskLab/woeboost/actions/workflows/freethreaded.yml/badge.svg" alt="Free-threaded"/>
+  <img src="https://github.com/xRiskLab/woeboost/actions/workflows/compatbility.yml/badge.svg" alt="Compatibility"/>
   <img src="https://img.shields.io/pypi/v/woeboost" alt="PyPI Version"/> 
   <img src="https://img.shields.io/github/license/xRiskLab/woeboost" alt="License"/> 
   <img src="https://img.shields.io/github/contributors/xRiskLab/woeboost" alt="Contributors"/> 
@@ -44,11 +46,60 @@
 
 ## Installation ⤵
 
+### Standard Installation
+
 Install the package using pip:
 
 ```bash
 pip install woeboost
 ```
+
+### Free-Threaded Python Support (Experimental)
+
+For significant performance improvements with free-threaded Python builds:
+
+```bash
+# Install with free-threaded dependencies
+pip install woeboost[freethreaded]
+
+# Or install free-threaded Python first, then WoeBoost
+uv python install 3.14.0a5+freethreaded
+pip install woeboost[freethreaded]
+```
+
+**Benefits of free-threaded Python:**
+- **3.67× faster training** - real measured performance improvement
+- **Automatic thread optimization** (8 threads vs 4 with GIL)
+- **No code changes required** - WoeBoost auto-detects free-threading
+- **Same results, faster computation** - identical convergence, 3.67× speedup
+
+```python
+from woeboost import WoeLearner
+
+# Automatically detects free-threading and optimizes thread count
+learner = WoeLearner(n_tasks=8)  # Uses more tasks with free-threading
+print(f"Free-threading detected: {learner.is_freethreaded}")
+```
+
+## 🧪 Free-Threaded Python Support
+
+WoeBoost includes experimental support for free-threaded Python builds, providing significant performance improvements for CPU-bound operations:
+
+- **3.67× speedup** for WoeBoost training with Python 3.14+freethreaded
+- **Optimal performance at 8 threads** (vs 4 with GIL)
+- **Tested on Python 3.14.0a5+freethreaded** (experimental builds)
+
+### Running Free-Threaded Tests
+
+```bash
+# Install free-threaded Python
+uv python install 3.14.0a5+freethreaded
+
+# Run free-threaded tests
+./tests/run_freethreaded_tests.sh
+```
+
+See [tests/README_FREETHREADED.md](tests/README_FREETHREADED.md) for detailed information.
 
 ## 💻 Example Usage
 
@@ -90,21 +141,14 @@ X_woe_test = woe_model.transform(X_test)
 
 - **[`Technical Note`](https://github.com/xRiskLab/woeboost/blob/main/docs/technical_note.md)**: Overview of the WoeBoost modules.
 - **[`learner.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/learner.md)**: Core module implementing a base learner.
+- **[`Development Guide`](DEVELOPMENT.md)**: Setup, testing, and contributing guidelines.
 - **[`classifier.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/classifier.md)**: Module for building a boosted classification model.
 - **[`explainer.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/explainer.md)**: Module for explaining the model predictions.
 
+## 📝 Changelog
+
+For a changelog, see [CHANGELOG](CHANGELOG.md).
+
 ## 📄 License
+
 This project is licensed under the MIT License - see the **[LICENSE](https://github.com/xRiskLab/woeboost/blob/main/LICENSE.md)** file for details.
-
-## 📃 Change Log
-
-- **v1.0.2**
-  - Support for `n_tasks` with legacy `n_threads` fallback (deprecated in the future).
-  - Updated concurrency support via a callable (e.g., `ThreadPoolExecutor`).
-  - Type hints improvements.
-
-- **v1.0.1**
-  - Adjusted feature importance default plot size and added minor updates of documentation.
-
-- **v1.0.0**
-  - Initial release of WoeBoost.

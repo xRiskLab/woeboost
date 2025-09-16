@@ -1,0 +1,71 @@
+name: Free-threaded Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  freethreaded-test:
+    name: Free-threaded Python Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+    
+    - name: Install free-threaded Python versions
+      run: |
+        uv python install 3.14.0a5+freethreaded
+        uv python install 3.13.2+freethreaded
+    
+    - name: Run free-threaded tests
+      run: |
+        python tests/run_freethreaded_tests.sh
+    
+    - name: Test with freethreaded extra
+      run: |
+        # Test installation with freethreaded extra
+        uv sync --group dev
+        uv add --group freethreaded
+        python -c "from woeboost import WoeBoostClassifier; print('Free-threading detected:', WoeBoostClassifier().is_freethreaded)"
+
+  performance-benchmark:
+    name: Performance Benchmark
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+    
+    - name: Install free-threaded Python
+      run: |
+        uv python install 3.14.0a5+freethreaded
+    
+    - name: Run performance benchmarks
+      run: |
+        # Run detailed performance tests
+        /Users/deburky/.local/share/uv/python/cpython-3.14.0a5+freethreaded-macos-aarch64-none/bin/python3.14 tests/freethreaded/test_freethreading_verification.py
+        /Users/deburky/.local/share/uv/python/cpython-3.14.0a5+freethreaded-macos-aarch64-none/bin/python3.14 tests/freethreaded/test_woeboost_freethreaded.py
+    
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: |
+          benchmark-*.json
+          performance-*.log
+
+
+

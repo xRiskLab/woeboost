@@ -15,6 +15,9 @@ import pytest
 from woeboost.classifier import WoeBoostClassifier
 from woeboost.explainer import EvidenceAnalyzer, PDPAnalyzer, WoeInferenceMaker
 
+# Mark all tests in this file as unit tests
+pytestmark = pytest.mark.unit
+
 # Prevent displaying plots during tests
 matplotlib.use("Agg")
 

@@ -14,6 +14,9 @@ import pytest
 
 from woeboost.learner import WoeLearner
 
+# Mark all tests in this file as unit tests
+pytestmark = pytest.mark.unit
+
 
 # pylint: disable=invalid-name, unused-argument
 @pytest.fixture
@@ -87,7 +90,7 @@ def test_bin_strategy_and_range_validation(bin_strategy, n_bins_range, expected_
     X = np.random.rand(100, 1)
     y = np.random.randint(0, 2, 100)
 
-    with pytest.raises(expected_exception) if (exc := expected_exception) else nullcontext():
+    with pytest.raises(expected_exception) if expected_exception else nullcontext():
         learner = WoeLearner(feature_names=["f1"], n_bins=n_bins_range, bin_strategy=bin_strategy)
         learner.fit(X, y)
 
@@ -126,7 +129,7 @@ def test_subsample_validation(subsample, expected_exception):
     X = np.random.rand(100, 2)
     y = np.random.randint(0, 2, 100)
 
-    with pytest.raises(expected_exception) if (exc := expected_exception) else nullcontext():
+    with pytest.raises(expected_exception) if expected_exception else nullcontext():
         learner = WoeLearner(
             feature_names=["f1", "f2"],
             categorical_features=None,

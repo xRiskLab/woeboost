@@ -16,6 +16,12 @@ repos:
       files: \.py$
       args:
         - "--disable=C0302"
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.1.7
+  hooks:
+    - id: ruff
+      args: [--fix, --exit-non-zero-on-fix]
+    - id: ruff-format
 - repo: https://github.com/PyCQA/pydocstyle
   rev: 6.3.0
   hooks:

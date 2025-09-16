@@ -15,6 +15,9 @@ import pytest
 from woeboost.classifier import WoeBoostClassifier, WoeBoostConfig
 from woeboost.learner import WoeLearner
 
+# Mark all tests in this file as unit tests
+pytestmark = pytest.mark.unit
+
 
 # Fixtures
 # pylint: disable=invalid-name
@@ -72,7 +75,7 @@ def test_n_bins_range_validation(n_bins_range, expected_exception, sample_data):
     """Test validation of `n_bins_range`."""
     X, y = sample_data
 
-    with pytest.raises(expected_exception) if (exc := expected_exception) else nullcontext():
+    with pytest.raises(expected_exception) if expected_exception else nullcontext():
         config = WoeBoostConfig(n_bins_range=n_bins_range, estimator=None)
         clf = WoeBoostClassifier(config=config)
         clf.fit(X, y)

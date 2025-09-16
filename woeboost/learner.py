@@ -20,6 +20,8 @@ You may obtain a copy of the License at:
 from __future__ import annotations
 
 import logging
+import os
+import sys
 import warnings
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable, List, Optional, Union
@@ -30,6 +32,61 @@ from rich.logging import RichHandler
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.isotonic import IsotonicRegression
 from sklearn.utils.validation import check_X_y
+
+
+def _detect_freethreading() -> bool:
+    """
+    Detect if Python is running with free-threading (no GIL).
+
+    Returns
+    -------
+    bool
+        True if free-threading is detected, False otherwise.
+    """
+    # Check for explicit free-threading indicators
+    if hasattr(sys, "_is_freethreaded"):
+        return sys._is_freethreaded  # pylint: disable=protected-access
+
+    # Check version string for free-threading indicators
+    version = sys.version.lower()
+    if "freethreaded" in version or "free-threading" in version:
+        return True
+
+    # Check for experimental free-threading builds
+    if "experimental" in version and "free" in version:
+        return True
+
+    return False
+
+
+def _get_optimal_thread_count(n_tasks: Optional[int] = None) -> int:
+    """
+    Get optimal thread count based on free-threading support.
+
+    Parameters
+    ----------
+    n_tasks : int, optional
+        Number of tasks to process. If None, uses number of features.
+
+    Returns
+    -------
+    int
+        Optimal number of threads to use.
+    """
+    if n_tasks is None:
+        n_tasks = 1
+
+    # Get available CPU cores
+    cpu_count = os.cpu_count() or 1
+
+    if _detect_freethreading():
+        # Free-threading: can use more threads effectively
+        # Optimal is usually 8 threads for CPU-bound tasks
+        return min(8, max(1, n_tasks), cpu_count)
+    else:
+        # GIL present: limited threading effectiveness
+        # Optimal is usually 4 threads due to GIL
+        return min(4, max(1, n_tasks), cpu_count)
 
 
 # pylint: disable=invalid-name
@@ -235,12 +292,20 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
             if n_tasks is None:
                 n_tasks = n_threads  # Fallback
 
-        self.n_tasks: Optional[int] = n_tasks if n_tasks is not None else 1
+        # Auto-optimize thread count based on free-threading support
+        if n_tasks is None:
+            # Use automatic optimization based on free-threading detection
+            n_tasks = _get_optimal_thread_count(len(feature_names) if feature_names else 1)
+
+        self.n_tasks: Optional[int] = n_tasks
         self.executor_cls: Optional[Callable[..., ThreadPoolExecutor]] = executor_cls
         self.verbosity: int = verbosity
 
         self.warning_issued: bool = False  # Flag to prevent duplicate warnings
         self._configure_logger()  # Configure logger
+
+        # Store free-threading status for user reference
+        self.is_freethreaded: bool = _detect_freethreading()
 
         self.bins_: dict[str, np.ndarray] = {}
         self.bin_averages_: dict[str, list[float]] = {}
