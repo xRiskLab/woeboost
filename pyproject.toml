@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "woeboost"
 version = "1.2.0"
@@ -36,8 +40,11 @@ dependencies = [
 Repository = "https://github.com/xRiskLab/woeboost"
 Homepage = "https://github.com/xRiskLab/woeboost"
 
-[tool.setuptools]
+[tool.hatch.build.targets.wheel]
 packages = ["woeboost"]
+
+[tool.hatch.build.targets.sdist]
+include = ["woeboost", "tests", "README.md", "LICENSE.md", "CHANGELOG.md"]
 
 [dependency-groups]
 dev = [

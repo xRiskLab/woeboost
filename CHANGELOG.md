@@ -6,6 +6,7 @@
   - Feature binning now also runs in parallel (previously only `transform` did, and only with an explicit `executor_cls`).
   - `n_tasks=None` is resolved at fit/transform time from the number of features instead of in `__init__`.
   - Free-threading detection uses `sys._is_gil_enabled()`, so it reports the runtime GIL state.
+  - Build backend switched to **hatchling** (previously no `[build-system]` was declared, so builds fell back to legacy setuptools).
   - Removed `requirements.txt` (dependencies are managed in `pyproject.toml` / `uv.lock`).
   - Removed the `freethreaded` extra: it only repeated the base dependencies, and free-threaded Python needs no extra packages.
   - Free-threaded CI now runs the test suite on Python 3.14t with the GIL disabled.
