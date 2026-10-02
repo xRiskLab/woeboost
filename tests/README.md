@@ -17,8 +17,7 @@ tests/
 │   ├── test_freethreading_verification.py
 │   ├── test_woeboost_freethreaded.py
 │   ├── test_minimal_freethreaded.py
-│   ├── run_freethreaded_tests.py
-│   └── README_FREETHREADED.md
+│   └── run_freethreaded_tests.py
 └── __init__.py
 ```
 
@@ -55,24 +54,6 @@ tests/
   - Thread scaling analysis
 
 ## Running Tests
-
-### Quick Commands
-
-```bash
-# Run all standard tests (unit + integration)
-make test
-
-# Run specific test categories
-make test-unit
-make test-integration
-make test-freethreaded
-
-# Run with coverage
-make test-coverage
-
-# Run everything
-make test-all
-```
 
 ### Using the Test Runner
 
@@ -121,7 +102,15 @@ The test suite uses pytest markers for categorization:
 
 ## Free-threaded Python Testing
 
-See [tests/freethreaded/README_FREETHREADED.md](freethreaded/README_FREETHREADED.md) for detailed information about free-threaded Python testing.
+`tests/run_freethreaded_tests.sh` runs the unit and integration suites on every installed free-threaded
+Python (`uv python install 3.14t`) with the GIL disabled:
+
+```bash
+./tests/run_freethreaded_tests.sh
+```
+
+`PYTHON_GIL=0` is required because extension modules that do not declare free-threading support
+(e.g., pandas 2.x) re-enable the GIL on import.
 
 ## Continuous Integration
 

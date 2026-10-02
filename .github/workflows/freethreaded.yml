@@ -11,53 +11,34 @@ jobs:
   freethreaded-test:
     name: Free-threaded Python Tests
     runs-on: ubuntu-latest
-    
+    env:
+      # Extension modules without free-threading support (e.g., pandas 2.x) re-enable the GIL on import
+      PYTHON_GIL: "0"
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install uv
       uses: astral-sh/setup-uv@v2
       with:
         version: "latest"
-    
+
     - name: Install free-threaded Python
       run: |
-        uv python install 3.13.2+freethreaded
-    
-    - name: Test with free-threaded Python
+        uv python install 3.14t
+
+    - name: Check free-threading detection
       run: |
-        # Test free-threading detection with actual free-threaded Python
-        uv run --python 3.13.2+freethreaded python -c "
+        uv run --python 3.14t --isolated --with-editable . python -c "
         import sys
+        from woeboost import WoeLearner
         print('Python version:', sys.version)
-        print('Free-threading enabled:', getattr(sys, '_is_freethreaded', False))
-        print('Version contains freethreaded:', 'freethreaded' in sys.version.lower())
-        
-        # Test WoeBoost free-threading detection logic
-        import os
-        def detect_freethreading():
-            if hasattr(sys, '_is_freethreaded'):
-                return sys._is_freethreaded
-            return 'freethreaded' in sys.version.lower() or 'free-threading' in sys.version.lower()
-        
-        freethreaded_detected = detect_freethreading()
-        print('WoeBoost would detect free-threading:', freethreaded_detected)
-        print('✅ Free-threaded Python test completed successfully')
+        assert not sys._is_gil_enabled(), 'GIL is enabled'
+        assert WoeLearner().is_freethreaded, 'WoeLearner did not detect free-threading'
+        print('Free-threading detected')
         "
-    
-    - name: Test freethreaded extra availability
+
+    - name: Run tests
       run: |
-        # Test that freethreaded extra is available
-        python -c "
-        import tomllib
-        with open('pyproject.toml', 'rb') as f:
-            data = tomllib.load(f)
-        if 'dependency-groups' in data and 'freethreaded' in data['dependency-groups']:
-            print('✅ Free-threaded extra is available')
-        else:
-            print('❌ Free-threaded extra not found')
-        "
-
-
-
-
+        uv run --python 3.14t --isolated --with-editable . --with pytest --with faker \
+          python -m pytest tests/unit tests/integration -v
