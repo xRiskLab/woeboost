@@ -8,6 +8,7 @@
   - Free-threading detection uses `sys._is_gil_enabled()`, so it reports the runtime GIL state.
   - Build backend switched to **hatchling** (previously no `[build-system]` was declared, so builds fell back to legacy setuptools).
   - Removed `requirements.txt` (dependencies are managed in `pyproject.toml` / `uv.lock`).
+  - Moved `pydocstyle` from runtime to dev dependencies.
   - Removed the `freethreaded` extra: it only repeated the base dependencies, and free-threaded Python needs no extra packages.
   - Free-threaded CI now runs the test suite on Python 3.13t with the GIL disabled.
 
