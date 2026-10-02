@@ -9,7 +9,7 @@
   - Build backend switched to **hatchling** (previously no `[build-system]` was declared, so builds fell back to legacy setuptools).
   - Removed `requirements.txt` (dependencies are managed in `pyproject.toml` / `uv.lock`).
   - Removed the `freethreaded` extra: it only repeated the base dependencies, and free-threaded Python needs no extra packages.
-  - Free-threaded CI now runs the test suite on Python 3.14t with the GIL disabled.
+  - Free-threaded CI now runs the test suite on Python 3.13t with the GIL disabled.
 
 - **v1.1.0** 🚀
   - **Free-threaded Python support** with `woeboost[freethreaded]` optional dependency

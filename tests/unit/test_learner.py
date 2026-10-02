@@ -143,14 +143,16 @@ def test_subsample_validation(subsample, expected_exception):
 
 
 def test_nan_handling():
-    """Test handling of NaN values."""
+    """NaN values are excluded from bin statistics (they get zero evidence at transform)."""
     X = np.array([[1], [2], [np.nan], [4]])
     y = np.array([0, 1, 0, 1])
     learner = WoeLearner(feature_names=["f1"], n_bins=2, bin_strategy="quantile")
     learner.fit(X, y)
 
-    assert len(learner.bins_["f1"]) == 3  # 2 bins + 1 NaN
-    assert learner.bin_counts_["f1"][-1] == 1  # NaN bin count
+    # Edges come from the non-NaN values [1, 2, 4]: bins [1, 2) and [2, 4)
+    assert len(learner.bins_["f1"]) == 3  # 2 bins -> 3 edges
+    assert learner.bin_counts_["f1"] == [1, 1]  # 1.0 and 2.0; NaN and the right edge (4.0) excluded
+    assert learner.transform(X)[2, 0] == 0.0  # NaN maps to zero evidence
 
 
 @pytest.mark.parametrize(

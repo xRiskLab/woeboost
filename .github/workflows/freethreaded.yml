@@ -25,11 +25,12 @@ jobs:
 
     - name: Install free-threaded Python
       run: |
-        uv python install 3.14t
+        # pandas 2.x ships 3.13t wheels but not 3.14t, which would require a source build
+        uv python install 3.13t
 
     - name: Check free-threading detection
       run: |
-        uv run --python 3.14t --isolated --with-editable . python -c "
+        uv run --python 3.13t --isolated --with-editable . python -c "
         import sys
         from woeboost import WoeLearner
         print('Python version:', sys.version)
@@ -40,5 +41,5 @@ jobs:
 
     - name: Run tests
       run: |
-        uv run --python 3.14t --isolated --with-editable . --with pytest --with faker \
+        uv run --python 3.13t --isolated --with-editable . --with pytest --with faker \
           python -m pytest tests/unit tests/integration -v
