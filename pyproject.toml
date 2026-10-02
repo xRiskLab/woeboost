@@ -78,7 +78,6 @@ python_functions = ["test_*"]
 markers = [
     "unit: Unit tests",
     "integration: Integration tests",
-    "freethreaded: Free-threaded Python tests",
     "slow: Slow running tests",
 ]
 
