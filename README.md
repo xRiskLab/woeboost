@@ -42,7 +42,7 @@
 
 - **💡 Interpretability**: Every model step adheres to principles familiar to risk managers and data scientists, ensuring transparency and trust.
 - **✅ Alignment with Regulatory Requirements**: Calibrated and interpretable results meet the demands of high-stakes applications.
-- **⚡ Flexibility**: Works seamlessly with diverse data types and supports concurrency for feature binning with Python's `concurrent.futures`.
+- **⚡ Flexibility**: Works seamlessly with diverse data types and bins and transforms features in parallel by default, with free-threaded Python support.
 
 ## Installation ⤵
 
@@ -54,52 +54,44 @@ Install the package using pip:
 pip install woeboost
 ```
 
-### Free-Threaded Python Support (Experimental)
+## ⚡ Parallelism
 
-For significant performance improvements with free-threaded Python builds:
-
-```bash
-# Install with free-threaded dependencies
-pip install woeboost[freethreaded]
-
-# Or install free-threaded Python first, then WoeBoost
-uv python install 3.14.0a5+freethreaded
-pip install woeboost[freethreaded]
-```
-
-**Benefits of free-threaded Python:**
-- **3.67× faster training** - real measured performance improvement
-- **Automatic thread optimization** (8 threads vs 4 with GIL)
-- **No code changes required** - WoeBoost auto-detects free-threading
-- **Same results, faster computation** - identical convergence, 3.67× speedup
+Features are binned and transformed in parallel on a thread pool by default — no configuration needed.
+The number of workers is chosen from the number of features (up to 4, or up to 8 on free-threaded Python).
 
 ```python
+from concurrent.futures import ThreadPoolExecutor
+
 from woeboost import WoeLearner
 
-# Automatically detects free-threading and optimizes thread count
-learner = WoeLearner(n_tasks=8)  # Uses more tasks with free-threading
+learner = WoeLearner()  # parallel by default
+learner = WoeLearner(n_tasks=8)  # explicit number of workers
+learner = WoeLearner(n_tasks=1)  # sequential
+learner = WoeLearner(n_tasks=8, executor_cls=ThreadPoolExecutor)  # any executor taking max_workers
 print(f"Free-threading detected: {learner.is_freethreaded}")
 ```
 
-## 🧪 Free-Threaded Python Support
+Results are identical to sequential processing. Measured on an Apple Silicon Mac (n=200,000, 20 features, 30 boosting rounds):
 
-WoeBoost includes experimental support for free-threaded Python builds, providing significant performance improvements for CPU-bound operations:
+| Python | `n_tasks=1` | default |
+|--------|-------------|---------|
+| 3.14 (GIL) | 11.1s | 5.1s |
+| 3.14t (free-threaded) | 11.0s | 4.0s |
 
-- **3.67× speedup** for WoeBoost training with Python 3.14+freethreaded
-- **Optimal performance at 8 threads** (vs 4 with GIL)
-- **Tested on Python 3.14.0a5+freethreaded** (experimental builds)
+NumPy releases the GIL inside its kernels, so most of the speedup is available on the standard build as well.
 
-### Running Free-Threaded Tests
+### Free-Threaded Python (Experimental)
+
+On a free-threaded build, WoeBoost uses more workers. Note that the GIL is re-enabled at runtime if an extension
+module does not declare free-threading support (`is_freethreaded` reflects the runtime state); set `PYTHON_GIL=0` to override.
 
 ```bash
-# Install free-threaded Python
-uv python install 3.14.0a5+freethreaded
+uv python install 3.14t
+PYTHON_GIL=0 uv run --python 3.14t --with woeboost python your_script.py
 
 # Run free-threaded tests
 ./tests/run_freethreaded_tests.sh
 ```
-
-See [tests/README_FREETHREADED.md](tests/README_FREETHREADED.md) for detailed information.
 
 ## 💻 Example Usage
 
@@ -141,7 +133,6 @@ X_woe_test = woe_model.transform(X_test)
 
 - **[`Technical Note`](https://github.com/xRiskLab/woeboost/blob/main/docs/technical_note.md)**: Overview of the WoeBoost modules.
 - **[`learner.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/learner.md)**: Core module implementing a base learner.
-- **[`Development Guide`](DEVELOPMENT.md)**: Setup, testing, and contributing guidelines.
 - **[`classifier.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/classifier.md)**: Module for building a boosted classification model.
 - **[`explainer.py`](https://github.com/xRiskLab/woeboost/blob/main/docs/explainer.md)**: Module for explaining the model predictions.
 

@@ -12,13 +12,7 @@ tests/
 │   └── test_learner.py      # WoeLearner unit tests
 ├── integration/             # Integration tests
 │   └── test_woeboost_performance.py  # Performance and integration tests
-├── freethreaded/            # Free-threaded Python tests
-│   ├── test_freethreaded.py
-│   ├── test_freethreading_verification.py
-│   ├── test_woeboost_freethreaded.py
-│   ├── test_minimal_freethreaded.py
-│   ├── run_freethreaded_tests.py
-│   └── README_FREETHREADED.md
+├── run_freethreaded_tests.sh  # Runs unit + integration tests on free-threaded Python
 └── __init__.py
 ```
 
@@ -44,35 +38,12 @@ tests/
   - Performance benchmarks
   - Threading performance tests
 
-### Free-threaded Tests (`tests/freethreaded/`)
-- **Purpose**: Test performance with free-threaded Python builds
-- **Scope**: CPU-intensive operations and threading performance
-- **Dependencies**: Free-threaded Python 3.14+ builds
-- **Speed**: Variable (performance tests can take longer)
-- **Examples**:
-  - Free-threading verification
-  - Binning performance with free-threading
-  - Thread scaling analysis
+### Free-threaded Runs (`run_freethreaded_tests.sh`)
+- **Purpose**: Run the unit and integration suites on free-threaded Python builds (3.14t, 3.13t)
+- **Scope**: Thread safety of parallel binning and transformation without the GIL
+- **Dependencies**: A free-threaded Python installed with `uv python install 3.14t`
 
 ## Running Tests
-
-### Quick Commands
-
-```bash
-# Run all standard tests (unit + integration)
-make test
-
-# Run specific test categories
-make test-unit
-make test-integration
-make test-freethreaded
-
-# Run with coverage
-make test-coverage
-
-# Run everything
-make test-all
-```
 
 ### Using the Test Runner
 
@@ -104,7 +75,6 @@ uv run pytest tests/integration -v
 # Run with markers
 uv run pytest -m unit -v
 uv run pytest -m integration -v
-uv run pytest -m freethreaded -v
 
 # Run with coverage
 uv run pytest --cov=woeboost --cov-report=html tests/unit tests/integration
@@ -116,12 +86,19 @@ The test suite uses pytest markers for categorization:
 
 - `@pytest.mark.unit` - Unit tests
 - `@pytest.mark.integration` - Integration tests
-- `@pytest.mark.freethreaded` - Free-threaded Python tests
 - `@pytest.mark.slow` - Slow running tests
 
 ## Free-threaded Python Testing
 
-See [tests/freethreaded/README_FREETHREADED.md](freethreaded/README_FREETHREADED.md) for detailed information about free-threaded Python testing.
+`tests/run_freethreaded_tests.sh` runs the unit and integration suites on every installed free-threaded
+Python (`uv python install 3.14t`) with the GIL disabled:
+
+```bash
+./tests/run_freethreaded_tests.sh
+```
+
+`PYTHON_GIL=0` is required because extension modules that do not declare free-threading support
+(e.g., pandas 2.x) re-enable the GIL on import.
 
 ## Continuous Integration
 
@@ -144,12 +121,6 @@ The test suite is designed to work with CI/CD pipelines:
 2. Use `@pytest.mark.integration` marker
 3. Use real data and dependencies
 4. Test complete workflows
-
-### Free-threaded Tests
-1. Create test file in `tests/freethreaded/`
-2. Use `@pytest.mark.freethreaded` marker
-3. Test CPU-intensive operations
-4. Compare performance with/without free-threading
 
 ## Performance Benchmarks
 

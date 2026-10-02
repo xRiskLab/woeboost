@@ -1,5 +1,17 @@
 # Changelog
 
+- **v1.2.0**
+  - **Parallel by default**: features are binned and transformed on a `ThreadPoolExecutor` without any configuration (`n_tasks=1` restores sequential processing).
+  - **Faster binning**: bin statistics are computed in a single pass (`searchsorted` + `bincount`) instead of one mask per bin; fitted bins are unchanged.
+  - Feature binning now also runs in parallel (previously only `transform` did, and only with an explicit `executor_cls`).
+  - `n_tasks=None` is resolved at fit/transform time from the number of features instead of in `__init__`.
+  - Free-threading detection uses `sys._is_gil_enabled()`, so it reports the runtime GIL state.
+  - Build backend switched to **hatchling** (previously no `[build-system]` was declared, so builds fell back to legacy setuptools).
+  - Removed `requirements.txt` (dependencies are managed in `pyproject.toml` / `uv.lock`).
+  - Moved `pydocstyle` from runtime to dev dependencies.
+  - Removed the `freethreaded` extra: it only repeated the base dependencies, and free-threaded Python needs no extra packages.
+  - Free-threaded CI now runs the test suite on Python 3.13t with the GIL disabled.
+
 - **v1.1.0** 🚀
   - **Free-threaded Python support** with `woeboost[freethreaded]` optional dependency
   - **Automatic performance optimization** - detects free-threading and optimizes thread usage

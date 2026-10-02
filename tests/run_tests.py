@@ -61,8 +61,8 @@ def run_all_standard_tests():
 
 
 def run_freethreaded_tests():
-    """Run free-threaded tests."""
-    cmd = ["python", "tests/freethreaded/run_freethreaded_tests.py"]
+    """Run the test suite on installed free-threaded Python builds."""
+    cmd = ["bash", "tests/run_freethreaded_tests.sh"]
     return run_command(cmd, "Free-threaded Tests")
 
 

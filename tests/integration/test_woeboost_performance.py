@@ -163,7 +163,7 @@ def compare_models(model1, model2, tolerance=1e-10):
 def main():
     """Main test function."""
     print(f"Python version: {sys.version}")
-    print(f"Free-threading enabled: {getattr(sys, '_is_freethreaded', False)}")
+    print(f"Free-threading enabled: {not getattr(sys, '_is_gil_enabled', lambda: True)()}")
     print("=" * 60)
 
     # Create test data

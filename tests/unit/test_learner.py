@@ -5,6 +5,7 @@ test_learner.py.
 Tests for the learner module.
 """
 
+import sys
 import warnings
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import nullcontext
@@ -12,7 +13,8 @@ from contextlib import nullcontext
 import numpy as np
 import pytest
 
-from woeboost.learner import WoeLearner
+from woeboost import learner as learner_module
+from woeboost.learner import WoeLearner, _bin_stats, _detect_freethreading
 
 # Mark all tests in this file as unit tests
 pytestmark = pytest.mark.unit
@@ -141,14 +143,16 @@ def test_subsample_validation(subsample, expected_exception):
 
 
 def test_nan_handling():
-    """Test handling of NaN values."""
+    """NaN values are excluded from bin statistics (they get zero evidence at transform)."""
     X = np.array([[1], [2], [np.nan], [4]])
     y = np.array([0, 1, 0, 1])
     learner = WoeLearner(feature_names=["f1"], n_bins=2, bin_strategy="quantile")
     learner.fit(X, y)
 
-    assert len(learner.bins_["f1"]) == 3  # 2 bins + 1 NaN
-    assert learner.bin_counts_["f1"][-1] == 1  # NaN bin count
+    # Edges come from the non-NaN values [1, 2, 4]: bins [1, 2) and [2, 4)
+    assert len(learner.bins_["f1"]) == 3  # 2 bins -> 3 edges
+    assert learner.bin_counts_["f1"] == [1, 1]  # 1.0 and 2.0; NaN and the right edge (4.0) excluded
+    assert learner.transform(X)[2, 0] == 0.0  # NaN maps to zero evidence
 
 
 @pytest.mark.parametrize(
@@ -273,6 +277,79 @@ def test_parallel_vs_sequential_results():
         rtol=1e-5,
         err_msg="Parallel and sequential results differ",
     )
+
+
+def test_bin_stats_matches_bin_boundaries():
+    """Bins are [left, right); values outside the edges and NaN are not counted."""
+    X = np.array([0.0, 0.5, 1.0, 1.5, 2.0, np.nan, -1.0])
+    y = np.array([1.0, 3.0, 5.0, 7.0, 100.0, 100.0, 100.0])
+    counts, averages = _bin_stats(X, y, np.array([0.0, 1.0, 2.0]))
+    np.testing.assert_array_equal(counts, [2, 2])
+    np.testing.assert_allclose(averages, [2.0, 6.0])
+
+
+def test_bin_stats_empty_and_duplicate_edges():
+    """Empty bins average to 0 and duplicate edges produce empty bins."""
+    X = np.array([0.0, 0.0, 0.5])
+    y = np.array([1.0, 2.0, 3.0])
+    counts, averages = _bin_stats(X, y, np.array([0.0, 0.0, 1.0, 2.0]))
+    np.testing.assert_array_equal(counts, [0, 3, 0])
+    np.testing.assert_allclose(averages, [0.0, 2.0, 0.0])
+
+
+def test_parallel_by_default(monkeypatch):
+    """Without `n_tasks`/`executor_cls`, features are processed on a thread pool."""
+    created = []
+
+    class SpyExecutor(ThreadPoolExecutor):
+        def __init__(self, *args, **kwargs):
+            created.append(kwargs.get("max_workers"))
+            super().__init__(*args, **kwargs)
+
+    monkeypatch.setattr(learner_module, "ThreadPoolExecutor", SpyExecutor)
+    monkeypatch.setattr(learner_module.os, "cpu_count", lambda: 8)
+    rng = np.random.default_rng(0)
+    X, y = rng.normal(size=(200, 3)), rng.integers(0, 2, 200)
+
+    learner = WoeLearner(feature_names=["a", "b", "c"]).fit(X, y)
+    learner.transform(X)
+
+    assert learner.n_tasks is None, "n_tasks should be resolved per call, not stored"
+    assert created == [3, 3], "Expected one pool for fit and one for transform"
+
+
+def test_sequential_when_n_tasks_is_one(monkeypatch):
+    """`n_tasks=1` never creates an executor."""
+
+    def fail(*args, **kwargs):
+        raise AssertionError("Executor should not be created")
+
+    monkeypatch.setattr(learner_module, "ThreadPoolExecutor", fail)
+    X, y = np.random.default_rng(0).normal(size=(50, 3)), np.arange(50) % 2
+    WoeLearner(feature_names=["a", "b", "c"], n_tasks=1).fit(X, y).transform(X)
+
+
+def test_default_parallel_matches_sequential_fit():
+    """Parallel binning (with subsampling) fits the same bins as sequential binning."""
+    rng = np.random.default_rng(0)
+    X = rng.normal(size=(1000, 6))
+    y = rng.integers(0, 2, 1000)
+    names = [f"f{i}" for i in range(6)]
+    kwargs = {"feature_names": names, "subsample": 0.7, "random_state": 42}
+
+    seq = WoeLearner(n_tasks=1, **kwargs).fit(X, y)
+    par = WoeLearner(**kwargs).fit(X, y)
+
+    for name in names:
+        np.testing.assert_array_equal(seq.bins_[name], par.bins_[name])
+        np.testing.assert_allclose(seq.bin_averages_[name], par.bin_averages_[name])
+    np.testing.assert_allclose(seq.transform(X), par.transform(X))
+
+
+def test_detect_freethreading_follows_runtime_gil():
+    """Free-threading is reported only when the GIL is actually disabled."""
+    is_gil_enabled = getattr(sys, "_is_gil_enabled", lambda: True)
+    assert _detect_freethreading() is (not is_gil_enabled())
 
 
 if __name__ == "__main__":

@@ -22,7 +22,8 @@ The `learner.py` module implements the core Weight of Evidence (WOE) learner, re
    - Produces interpretable scores that can be summed across features and iterations.
 
 ### 4. **Parallel Processing**
-   - Accelerates binning and transformation operations using multi-threading by setting `n_threads`.
+   - Bins and transforms features in parallel on a thread pool by default (up to 4 workers, or up to 8 on free-threaded Python).
+   - Set `n_tasks=1` for sequential processing, or pass any executor via `executor_cls`.
 
 > Different levels of verbosity can be set in accordance with Python's `logging` module (default is `logging.WARNING`).
 
@@ -45,11 +46,12 @@ The `WoeLearner` class implements the core functionality of the Weight of Eviden
 | `categorical_features`  | `List[str]`       | `None`        | List of categorical features.                                              |
 | `monotonicity`          | `dict`            | `None`        | Dictionary of monotonicity constraints (`'increasing'` or `'decreasing'`). |
 | `infer_monotonicity`    | `bool`            | `False`       | Whether to automatically infer monotonicity.                               |
-| `n_tasks`             | `int`             | `None`        | Number of tasks for concurrent operations.                                 |
-| `executor_cls`          | `str`             | `None`    | Executor class for concurrent operations (e.g., `'ThreadPoolExecutor'`).      |
+| `n_tasks`             | `int`             | `None`        | Number of parallel workers. `None` chooses automatically; `1` runs sequentially. |
+| `executor_cls`          | `Callable`        | `None`    | Executor called as `executor_cls(max_workers=...)`. Defaults to `ThreadPoolExecutor`. |
 | `verbosity`             | `int`             | `logging.WARNING` | Logging level (`DEBUG`, `INFO`, etc.).                                    |
 
-Starting from v1.0.2, `n_tasks` and `executor_cls` were added to support concurrent operations. `n_threads` was removed in favor of these parameters.
+Starting from v1.0.2, `n_tasks` and `executor_cls` were added to support concurrent operations. `n_threads` is deprecated in favor of these parameters. Parallel processing is the default since v1.2.0.
+
 ---
 
 ### **Attributes**

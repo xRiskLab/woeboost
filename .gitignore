@@ -10,6 +10,7 @@ __pycache__/
 .venv/
 .ruff_cache/
 woeboost.egg-info/
+dist/
 .dev_notes.md
 .vscode**/*
 performance_tests/

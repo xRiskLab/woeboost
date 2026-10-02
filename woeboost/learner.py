@@ -43,18 +43,10 @@ def _detect_freethreading() -> bool:
     bool
         True if free-threading is detected, False otherwise.
     """
-    # Check for explicit free-threading indicators
-    if hasattr(sys, "_is_freethreaded"):
-        return sys._is_freethreaded  # pylint: disable=protected-access
-
-    # Check version string for free-threading indicators
-    version = sys.version.lower()
-    if "freethreaded" in version or "free-threading" in version:
-        return True
-
-    # Check for experimental free-threading builds
-    if "experimental" in version and "free" in version:
-        return True
+    # Python 3.13+: a free-threaded build can still re-enable the GIL at runtime
+    # (e.g., when an extension module does not declare free-threading support).
+    if hasattr(sys, "_is_gil_enabled"):
+        return not sys._is_gil_enabled()  # pylint: disable=protected-access
 
     return False
 
@@ -66,7 +58,7 @@ def _get_optimal_thread_count(n_tasks: Optional[int] = None) -> int:
     Parameters
     ----------
     n_tasks : int, optional
-        Number of tasks to process. If None, uses number of features.
+        Number of tasks to process (e.g., number of features).
 
     Returns
     -------
@@ -79,14 +71,30 @@ def _get_optimal_thread_count(n_tasks: Optional[int] = None) -> int:
     # Get available CPU cores
     cpu_count = os.cpu_count() or 1
 
-    if _detect_freethreading():
-        # Free-threading: can use more threads effectively
-        # Optimal is usually 8 threads for CPU-bound tasks
-        return min(8, max(1, n_tasks), cpu_count)
-    else:
-        # GIL present: limited threading effectiveness
-        # Optimal is usually 4 threads due to GIL
-        return min(4, max(1, n_tasks), cpu_count)
+    # Without the GIL, Python-level work scales across threads as well;
+    # with it, only the NumPy kernels (which release the GIL) run in parallel.
+    max_threads = 8 if _detect_freethreading() else 4
+    return min(max_threads, max(1, n_tasks), cpu_count)
+
+
+def _bin_stats(
+    X: np.ndarray, y: np.ndarray, bin_edges: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Count samples and average `y` per bin in a single pass.
+
+    Bin `j` covers `[bin_edges[j], bin_edges[j + 1])`. Values outside the edges
+    (including NaN and the right-most edge itself) are not assigned to any bin.
+    Empty bins get an average of 0.
+    """
+    n_bins = len(bin_edges) - 1
+    indices = np.searchsorted(bin_edges, X, side="right") - 1
+    in_range = (indices >= 0) & (indices < n_bins)
+    indices, y = indices[in_range], y[in_range]
+    counts = np.bincount(indices, minlength=n_bins)
+    sums = np.bincount(indices, weights=y, minlength=n_bins)
+    averages = np.divide(sums, counts, out=np.zeros(n_bins), where=counts > 0)
+    return counts, averages
 
 
 # pylint: disable=invalid-name
@@ -174,11 +182,13 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
         Whether to infer monotonicity constraints automatically based on the data.
 
     n_tasks : int, default=None
-        The number of threads or processes to use for parallel operations. If None,
-        operations will be executed sequentially.
+        The number of workers used to bin and transform features in parallel. If None,
+        it is chosen from the number of features and the interpreter (up to 8 on
+        free-threaded Python, up to 4 otherwise). Set to 1 to run sequentially.
 
     executor_cls : Callable[..., ThreadPoolExecutor], default=None
-        The type of executor to use for parallel operations.
+        The executor used for parallel operations, called as `executor_cls(max_workers=...)`.
+        If None, a `ThreadPoolExecutor` is used.
 
     verbosity : int, default=logging.WARNING
         The logging level for controlling verbosity. Options are standard logging
@@ -260,10 +270,12 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
         infer_monotonicity : bool, default=False
             Whether to infer monotonicity constraints automatically based on the data.
         n_tasks : int, default=None
-            The number of threads or processes to use for parallel operations. If None,
-            operations will be executed sequentially.
+            The number of workers used to bin and transform features in parallel. If None,
+            it is chosen from the number of features and the interpreter (up to 8 on
+            free-threaded Python, up to 4 otherwise). Set to 1 to run sequentially.
         executor_cls : Callable[..., ThreadPoolExecutor], default=None
-            The type of executor to use for parallel operations.
+            The executor used for parallel operations, called as
+            `executor_cls(max_workers=...)`. If None, a `ThreadPoolExecutor` is used.
         verbosity : int, default=logging.WARNING
             The logging level for controlling verbosity. Options are standard logging
             levels like logging.DEBUG, logging.INFO, and logging.WARNING.
@@ -292,11 +304,7 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
             if n_tasks is None:
                 n_tasks = n_threads  # Fallback
 
-        # Auto-optimize thread count based on free-threading support
-        if n_tasks is None:
-            # Use automatic optimization based on free-threading detection
-            n_tasks = _get_optimal_thread_count(len(feature_names) if feature_names else 1)
-
+        # None is resolved per call from the number of features (see `_map_features`)
         self.n_tasks: Optional[int] = n_tasks
         self.executor_cls: Optional[Callable[..., ThreadPoolExecutor]] = executor_cls
         self.verbosity: int = verbosity
@@ -384,18 +392,8 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
         else:
             bin_edges = np.quantile(X, np.linspace(0, 1, n_bins + 1))
 
-        bin_averages = []
-        bin_counts = []
-
-        for j in range(len(bin_edges) - 1):
-            mask = (X >= bin_edges[j]) & (X < bin_edges[j + 1])
-            bin_counts.append(np.sum(mask))
-            if np.any(mask):  # Handle empty bins
-                bin_averages.append(y[mask].mean())
-            else:
-                bin_averages.append(0)
-
-        return bin_edges, bin_counts, bin_averages
+        bin_counts, bin_averages = _bin_stats(X, y, bin_edges)
+        return bin_edges, bin_counts.tolist(), bin_averages.tolist()
 
     def _histogram_binning(
         self, X: np.ndarray, y: np.ndarray, n_bins_or_method: Union[int, str] = "scott"
@@ -419,18 +417,8 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
         else:
             counts, bin_edges = np.histogram(X, bins=n_bins_or_method)
 
-        bin_averages = []
-        bin_counts = []
-
-        for j in range(len(bin_edges) - 1):
-            mask = (X >= bin_edges[j]) & (X < bin_edges[j + 1])
-            bin_counts.append(np.sum(mask))
-            if np.any(mask):  # Handle empty bins
-                bin_averages.append(y[mask].mean())
-            else:
-                bin_averages.append(0)
-
-        return bin_edges, counts, bin_averages
+        _, bin_averages = _bin_stats(X, y, bin_edges)
+        return bin_edges, counts, bin_averages.tolist()
 
     def _bin_features(self, X: np.ndarray, y: np.ndarray) -> None:  # pylint: disable=invalid-name, too-many-locals, too-many-branches, too-many-positional-arguments, too-many-statements
         """
@@ -503,17 +491,11 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
         def _process_categorical_feature(feature_name, feature_data, y_sampled):
             """Process categorical feature: encode categories and calculate bin stats."""
             categories, codes = encode_categories_once(feature_data)
-            bin_averages = np.zeros(len(categories))
-            bin_counts = np.zeros(len(categories), dtype=int)
-
-            for idx in range(len(categories)):
-                mask = codes == idx
-                bin_counts[idx] = np.sum(mask)
-                bin_averages[idx] = y_sampled[mask].mean() if bin_counts[idx] > 0 else 0.0
-
-            self.bins_[feature_name] = categories
-            self.bin_averages_[feature_name] = bin_averages.tolist()
-            self.bin_counts_[feature_name] = bin_counts.tolist()
+            bin_counts = np.bincount(codes, minlength=len(categories))
+            bin_sums = np.bincount(codes, weights=y_sampled, minlength=len(categories))
+            bin_averages = np.divide(
+                bin_sums, bin_counts, out=np.zeros(len(categories)), where=bin_counts > 0
+            )
 
             self.logger.info(
                 "Processed categorical feature: [bold slate_blue1]%s"
@@ -521,6 +503,7 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
                 feature_name,
                 len(categories),
             )
+            return categories, bin_counts.tolist(), bin_averages.tolist()
 
         def _process_numerical_feature(feature_name, feature_data, y_sampled):
             """Process numerical feature: bin data and calculate bin stats."""
@@ -541,17 +524,25 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
                 self.logger.error("Unsupported bin_strategy: %s", self.bin_strategy)
                 raise ValueError(f"Unsupported bin_strategy: {self.bin_strategy}")
 
-            self.bins_[feature_name] = bin_edges
-            self.bin_counts_[feature_name] = bin_counts
-            self.bin_averages_[feature_name] = bin_averages
             self.logger.info(
                 "Processed numerical feature: [bold slate_blue1]%s"
                 "[/bold slate_blue1] with %d bins.",
                 feature_name,
                 len(bin_edges) - 1,
             )
+            return bin_edges, bin_counts, bin_averages
 
+        def _bin_feature(task):
+            """Bin a single feature. Runs in a worker, so it must not write to `self`."""
+            feature_name, feature_data, y_sampled, is_categorical = task
+            if is_categorical:
+                return _process_categorical_feature(feature_name, feature_data, y_sampled)
+            return _process_numerical_feature(feature_name, feature_data, y_sampled)
+
+        # Type detection and subsampling stay sequential so that the random
+        # draws (and thus the fitted bins) do not depend on thread scheduling.
         np.random.seed(self.random_state)
+        tasks = []
         for i, feature in enumerate(self.feature_names):
             # Get feature data
             feature_data = X[:, i]
@@ -576,15 +567,15 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
             else:
                 y_sampled = y
 
-            # Process features based on type
-            if is_categorical:
-                logging.info(
-                    "Processing categorical feature: [bold slate_blue1]%s[/bold slate_blue1]",
-                    feature,
-                )
-                _process_categorical_feature(feature, feature_data, y_sampled)
-            else:
-                _process_numerical_feature(feature, feature_data, y_sampled)
+            tasks.append((feature, feature_data, y_sampled, is_categorical))
+
+        results = self._map_features(_bin_feature, tasks)
+        for (feature, _, _, is_categorical), (bins, bin_counts, bin_averages) in zip(
+            tasks, results
+        ):
+            self.bins_[feature] = bins
+            self.bin_counts_[feature] = bin_counts
+            self.bin_averages_[feature] = bin_averages
 
             # Enforce monotonicity for numerical features
             if not is_categorical and feature in self.monotonicity:
@@ -594,6 +585,20 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
         self.logger.info(
             "[bold pale_green3]Feature binning completed for all features.[/bold pale_green3]"
         )
+
+    def _map_features(self, func: Callable, tasks: list) -> list:
+        """
+        Apply `func` to per-feature tasks, in parallel when more than one worker is available.
+
+        Results are returned in task order regardless of completion order.
+        """
+        n_workers = self.n_tasks or _get_optimal_thread_count(len(tasks))
+        if n_workers <= 1 or len(tasks) <= 1:
+            return list(map(func, tasks))
+
+        executor_cls = self.executor_cls or ThreadPoolExecutor
+        with executor_cls(max_workers=n_workers) as executor:
+            return list(executor.map(func, tasks))
 
     def _collect_evidence(self, X: np.ndarray) -> np.ndarray:  # pylint: disable=invalid-name
         """
@@ -614,14 +619,7 @@ class WoeLearner(BaseEstimator, ClassifierMixin):  # pylint: disable=too-many-in
             (i, X[:, i], feat_names[i], cat_feats, bins, bin_avgs) for i in range(len(feat_names))
         ]
 
-        # Parallel processing using Ray
-        if self.executor_cls and self.n_tasks and self.n_tasks > 1:
-            with self.executor_cls(max_workers=self.n_tasks) as executor:
-                results = executor.map(parse_feature, args_list)
-        else:
-            results = map(parse_feature, args_list)
-
-        for i, transformed_feature in results:
+        for i, transformed_feature in self._map_features(parse_feature, args_list):
             transformed_features[:, i] = transformed_feature
 
         return transformed_features
